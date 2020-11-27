@@ -8,11 +8,20 @@ Board::Board(QWidget *parent) :
     ui->setupUi(this);
     setAcceptDrops(true);
     BoardIcon.load(":/images/MainBoard");
-    queenB1 = std::make_unique<Queen>(this);
-    queenB1->move(170,20);
-    queenB1->show();
+
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    pieces.push_back(std::make_unique<Queen>(this,true));
+    for (unsigned i=0;i<pieces.size();i++) {
+        pieces[i]->move((i%8)*45+35,(i/8)*45+25);
+    }
 }
-//35,25-80,70 diff 45
 Board::~Board()
 {
     delete ui;
@@ -81,7 +90,7 @@ void Board::dragMoveEvent(QDragMoveEvent *event)
             QPoint offset,result;
             dataStream>>offset;
             result=event->pos()-offset;
-            queenB1->move(result);
+            pieces[0]->move(result);
             //qDebug()<<result.x()<<"\t"<<result.y()<<"\n";
         }
         else
@@ -105,14 +114,14 @@ void Board::dropEvent(QDropEvent* event){
         result=event->pos() - offset;
         iMatrix=IndiceActual(result);
         iX=tiles[iMatrix.x()][iMatrix.y()].x+20;
-        iY=tiles[iMatrix.x()][iMatrix.y()].y+35;
+        iY=tiles[iMatrix.x()][iMatrix.y()].y+40;
         if(iMatrix.x()!=-1&&iMatrix.y()!=-1)
         {
-            queenB1->move(iX,iY);
+            pieces[0]->move(iX,iY);
             tiles[iMatrix.x()][iMatrix.y()].SetContainPiece(true);
         }
         else
-            queenB1->move(result);
+            pieces[0]->move(result);
         if(event->source() == this){
            event->setDropAction(Qt::MoveAction);
            event->accept();
@@ -120,7 +129,7 @@ void Board::dropEvent(QDropEvent* event){
         qDebug()<<"La matriz "<<iMatrix.x()<<","<<iMatrix.y()
                <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
     }
-    qDebug()<<queenB1->x()<<"\t"<<queenB1->y()<<"\n";
+    qDebug()<<pieces[0]->x()<<"\t"<<pieces[0]->y()<<"\n";
 }
 
 QPoint Board::IndiceActual(const QPoint &p)

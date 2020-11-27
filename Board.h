@@ -33,8 +33,7 @@ private:
     //variables privadas
     Ui::Board *ui;
     QPixmap BoardIcon;
-    std::unique_ptr<Piece> queenB1,queenB2;
-    std::vector<std::unique_ptr<Piece>>queens;
+    std::vector<std::unique_ptr<Piece>>pieces;
     Matrix tiles;
     QPoint pOrigin;
     //funciones privadas

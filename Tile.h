@@ -11,7 +11,6 @@ public:
     Tile(int,int);
     int x{0},y{0};
     uint16_t w{45},h{45};
-
     bool GetContainPiece();
     void SetContainPiece(bool);
 private:
