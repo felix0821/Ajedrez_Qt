@@ -35,9 +35,8 @@ private:
     QPixmap BoardIcon;
     std::unique_ptr<Piece> queenB1,queenB2;
     std::vector<std::unique_ptr<Piece>>queens;
-    Matrix tiles{8,8};
+    Matrix tiles;
     QPoint pOrigin;
-
     //funciones privadas
     //funciones de evento
     void mousePressEvent(QMouseEvent*) override;

@@ -1,18 +1,23 @@
 #include "Matrix.h"
 
-Matrix::Matrix(const std::size_t x,const std::size_t y)
+Matrix::Matrix()
 {
-    Data=std::vector<Array>(x, Array{y});
+    for(int i=0;i<ROW;i++)
+    {
+        std::vector <Tile> fogRow;
+        for(int j=0;j<COL;j++)
+        {
+            int x=((i)*45)+15;
+            int y=((j)*45)-15;
+            fogRow.push_back(Tile(x,y));
+        }
+        Data.push_back(fogRow);
+    }
 }
-std::size_t Matrix::getSize()const
-{
-    return Data.size();
-}
-const Array& Matrix::operator[] (unsigned index)const
+const std::vector<Tile>& Matrix::operator[] (unsigned index)const
 {
     return Data[index];
 }
-Array& Matrix::operator[] (unsigned index)
-{
+std::vector<Tile>& Matrix::operator[] (unsigned index){
     return Data[index];
 }

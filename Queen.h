@@ -8,7 +8,8 @@
 class Queen : public Piece
 {
 public:
-    explicit Queen(QWidget *parent = nullptr);
+    Queen() = delete;
+    explicit Queen(QWidget *parent = nullptr,bool color=false);
     ~Queen(){};
     void MovePiece();
 };

@@ -1,19 +1,19 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 #include <iostream>
-#include "Array.h"
-
+#include "Tile.h"
+#define ROW 8
+#define COL 8
 class Matrix
 {
 private:
-    std::vector<Array>Data{0,Array{0}};
+    std::vector<std::vector<Tile>> Data;
 public:
-    Matrix()=delete;
-    Matrix(const std::size_t x,const std::size_t y);
-    ~Matrix(){}
+    Matrix();
+    ~Matrix(){};
     std::size_t getSize()const;
-    const Array& operator[] (unsigned index)const;
-    Array& operator[] (unsigned index);
+    const std::vector<Tile>& operator[] (unsigned index)const;
+    std::vector<Tile>& operator[] (unsigned index);
 };
 
 #endif // MATRIX_H

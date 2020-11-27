@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <QLabel>
-
 namespace Ui {
 class Piece;
 }
@@ -20,6 +19,7 @@ private:
     Ui::Piece *ui;
 protected:
     QPixmap icon{};
+    bool color = 0; // 0 for black, 1 for white
 };
 
 #endif // PIECE_H

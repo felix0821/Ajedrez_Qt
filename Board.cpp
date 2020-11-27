@@ -7,20 +7,8 @@ Board::Board(QWidget *parent) :
 {
     ui->setupUi(this);
     setAcceptDrops(true);
-    for(int i=0;i<8;++i)
-    {
-        for(int j=0;j<8;++j)
-        {
-            int x=((i)*45)+15;
-            int y=((j)*45)-15;
-            tiles[i][j]=Tile(x,y);
-        }
-    }
     BoardIcon.load(":/images/MainBoard");
-    //queenB2 = std::make_unique<Queen>(this);
     queenB1 = std::make_unique<Queen>(this);
-    //queenB2->move(80,70);
-    //queenB2->show();
     queenB1->move(170,20);
     queenB1->show();
 }
@@ -33,21 +21,18 @@ void Board::paintEvent(QPaintEvent*){
     QPainter painter;
     painter.begin(this);
     painter.drawPixmap(0,0,width(),height(),BoardIcon);
-
-    //painter.drawTiledPixmap(0,0,width(),height(),BoardIcon);
     painter.end();
 }
 
 void Board::mousePressEvent(QMouseEvent* event){
     QPoint iMatrix,result;
     auto child = childAt(event->pos());
-
     if(child == nullptr)
     {
-        qDebug()<<"null\n";
+        qDebug()<<"No hay pieza\n";
         return;
     }
-    qDebug()<<"child enc\n";
+    qDebug()<<"Pieza Encontrada\n";
     qDebug()<<child->x()<<"\t"<<child->y()<<"\n";
     //Desactivar casillero
     result= {child->x(),child->y()};
@@ -57,10 +42,10 @@ void Board::mousePressEvent(QMouseEvent* event){
            <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
     //Marcar casillero actual
     pOrigin=QPoint{child->x(),child->y()};
+
     QByteArray data;
     QDataStream dataStream(&data, QIODevice::WriteOnly);
     dataStream<<QPoint(event->pos()-child->pos());
-
     QMimeData* mimeData = new QMimeData();
     mimeData->setData("application/x-dnditemdata", data);
     QDrag* drag = new QDrag(this);
@@ -141,8 +126,7 @@ void Board::dropEvent(QDropEvent* event){
 QPoint Board::IndiceActual(const QPoint &p)
 {
     QPoint indice{0,0};
-    int i;
-    for(i=0;i<8;++i)
+    for(int i=0;i<8;++i)
     {
         if(p.x()<tiles[i][0].x+tiles[i][0].w&&p.x()>=tiles[i][0].x)
         {

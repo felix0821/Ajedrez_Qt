@@ -10,7 +10,6 @@ public:
     Tile();
     Tile(int,int);
     int x{0},y{0};
-    //w=ancho,h=alto
     uint16_t w{45},h{45};
 
     bool GetContainPiece();
