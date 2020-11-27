@@ -8,12 +8,13 @@
 #include <QMimeData>
 #include <QDrag>
 #include <QDebug>
-
 #include <memory>
 #include <iostream>
 
+#include <vector>
 #include "Queen.h"
 #include "Piece.h"
+#include "Matrix.h"
 
 namespace Ui {
 class Board;
@@ -29,13 +30,21 @@ public:
     void paintEvent(QPaintEvent*) override;
 
 private:
+    //variables privadas
     Ui::Board *ui;
     QPixmap BoardIcon;
-    std::unique_ptr<Piece> queen;
+    std::unique_ptr<Piece> queenB1,queenB2;
+    std::vector<std::unique_ptr<Piece>>queens;
+    Matrix tiles{8,8};
+
+    //funciones privadas
+    //funciones de evento
     void mousePressEvent(QMouseEvent*) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent* event) override;
+    //funciones complemento
+    QPoint IndiceActual(const QPoint &p);
 };
 
 #endif // BOARD_H

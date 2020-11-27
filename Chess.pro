@@ -9,7 +9,9 @@ CONFIG += c++20
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Array.cpp \
     Board.cpp \
+    Matrix.cpp \
     Piece.cpp \
     Queen.cpp \
     Tile.cpp \
@@ -17,7 +19,9 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    Array.h \
     Board.h \
+    Matrix.h \
     Piece.h \
     Queen.h \
     Tile.h \

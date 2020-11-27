@@ -8,10 +8,15 @@ class Tile
 {
 public:
     Tile();
-    int x,y;
-    uint16_t w,h;
+    Tile(int,int);
+    int x{0},y{0};
+    //w=ancho,h=alto
+    uint16_t w{45},h{45};
+
+    bool GetContainPiece();
+    void SetContainPiece(bool);
 private:
-    std::unique_ptr<Piece> piece;
+    //std::unique_ptr<Piece> piece;
     bool containPiece;
 };
 
