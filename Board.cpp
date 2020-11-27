@@ -17,12 +17,11 @@ Board::Board(QWidget *parent) :
         }
     }
     BoardIcon.load(":/images/MainBoard");
-    //Queen q1,q2;
     //queenB2 = std::make_unique<Queen>(this);
     queenB1 = std::make_unique<Queen>(this);
     //queenB2->move(80,70);
     //queenB2->show();
-    queenB1->move(35,160);
+    queenB1->move(170,20);
     queenB1->show();
 }
 //35,25-80,70 diff 45
@@ -40,13 +39,24 @@ void Board::paintEvent(QPaintEvent*){
 }
 
 void Board::mousePressEvent(QMouseEvent* event){
+    QPoint iMatrix,result;
     auto child = childAt(event->pos());
+
     if(child == nullptr)
     {
         qDebug()<<"null\n";
         return;
     }
     qDebug()<<"child enc\n";
+    qDebug()<<child->x()<<"\t"<<child->y()<<"\n";
+    //Desactivar casillero
+    result= {child->x(),child->y()};
+    iMatrix=IndiceActual(result);
+    tiles[iMatrix.x()][iMatrix.y()].SetContainPiece(false);
+    qDebug()<<"La matriz "<<iMatrix.x()<<","<<iMatrix.y()
+           <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
+    //Marcar casillero actual
+    pOrigin=QPoint{child->x(),child->y()};
     QByteArray data;
     QDataStream dataStream(&data, QIODevice::WriteOnly);
     dataStream<<QPoint(event->pos()-child->pos());
@@ -80,6 +90,14 @@ void Board::dragMoveEvent(QDragMoveEvent *event)
         if (event->source() == this) {
             event->setDropAction(Qt::MoveAction);
             event->accept();
+            //Arrastrar ficha
+            QByteArray data = event->mimeData()->data("application/x-dnditemdata");
+            QDataStream dataStream(&data, QIODevice::ReadOnly);
+            QPoint offset,result;
+            dataStream>>offset;
+            result=event->pos()-offset;
+            queenB1->move(result);
+            //qDebug()<<result.x()<<"\t"<<result.y()<<"\n";
         }
         else
         {
@@ -90,26 +108,32 @@ void Board::dragMoveEvent(QDragMoveEvent *event)
     {
         event->ignore();
     }
+
 }
 void Board::dropEvent(QDropEvent* event){
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         QByteArray data = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&data, QIODevice::ReadOnly);
-        int xI,yI;
-        QPoint offset,result,e;
+        int iX=0,iY=0;
+        QPoint offset,iMatrix,result;
         dataStream>>offset;
-        e=event->pos() - offset;
-        result=IndiceActual(e);
-        xI=tiles[result.x()][result.y()].x+20;
-        yI=tiles[result.x()][result.y()].y+35;
-        if(result.x()!=-1&&result.y()!=-1)
-            queenB1->move(xI,yI);
+        result=event->pos() - offset;
+        iMatrix=IndiceActual(result);
+        iX=tiles[iMatrix.x()][iMatrix.y()].x+20;
+        iY=tiles[iMatrix.x()][iMatrix.y()].y+35;
+        if(iMatrix.x()!=-1&&iMatrix.y()!=-1)
+        {
+            queenB1->move(iX,iY);
+            tiles[iMatrix.x()][iMatrix.y()].SetContainPiece(true);
+        }
         else
-            queenB1->move(event->pos() - offset);
+            queenB1->move(result);
         if(event->source() == this){
            event->setDropAction(Qt::MoveAction);
            event->accept();
         }
+        qDebug()<<"La matriz "<<iMatrix.x()<<","<<iMatrix.y()
+               <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
     }
     qDebug()<<queenB1->x()<<"\t"<<queenB1->y()<<"\n";
 }
