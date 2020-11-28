@@ -14,3 +14,11 @@ void Tile::SetContainPiece(bool contain)
 {
     containPiece=contain;
 }
+int Tile::GetX()const
+{
+    return x;
+}
+int Tile::GetY()const
+{
+    return y;
+}

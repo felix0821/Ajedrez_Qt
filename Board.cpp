@@ -4,22 +4,28 @@
 Board::Board(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Board)
-{
+{   //QPoint index;
     ui->setupUi(this);
     setAcceptDrops(true);
     BoardIcon.load(":/images/MainBoard");
-
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
-    pieces.push_back(std::make_unique<Queen>(this,true));
+    int cD=coeficienteDistancia;
+    //Creacion de fichas (referencia,color,posicion)
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,0}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,1}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,2}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,3}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,4}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,5}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,6}));
+    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,7}));
+    pieces.push_back(std::make_unique<Queen>(this,false,QPoint{7,7}));
+    //Posicionar fichas
     for (unsigned i=0;i<pieces.size();i++) {
-        pieces[i]->move((i%8)*45+35,(i/8)*45+25);
+        int iX=pieces[i]->GetPosition().x();
+        int iY=pieces[i]->GetPosition().y();
+        tiles[iX][iY].SetContainPiece(true);
+        pieces[i]->move(tiles[iX][iY].GetX()+cD,
+                tiles[iX][iY].GetY()+(2*cD));
     }
 }
 Board::~Board()
@@ -32,10 +38,11 @@ void Board::paintEvent(QPaintEvent*){
     painter.drawPixmap(0,0,width(),height(),BoardIcon);
     painter.end();
 }
-
 void Board::mousePressEvent(QMouseEvent* event){
-    QPoint iMatrix,result;
+    QPoint result;
     auto child = childAt(event->pos());
+    selectionPiece= static_cast<Piece*>(childAt(event->pos()));
+    //qDebug()<<selectionPiece->GetColor()<<"\n";
     if(child == nullptr)
     {
         qDebug()<<"No hay pieza\n";
@@ -45,13 +52,13 @@ void Board::mousePressEvent(QMouseEvent* event){
     qDebug()<<child->x()<<"\t"<<child->y()<<"\n";
     //Desactivar casillero
     result= {child->x(),child->y()};
-    iMatrix=IndiceActual(result);
-    tiles[iMatrix.x()][iMatrix.y()].SetContainPiece(false);
-    qDebug()<<"La matriz "<<iMatrix.x()<<","<<iMatrix.y()
-           <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
+    mOrigin=IndiceActual(result);
+    tiles[mOrigin.x()][mOrigin.y()].SetContainPiece(false);
+    qDebug()<<"La matriz "<<mOrigin.x()<<","<<mOrigin.y()
+           <<tiles[mOrigin.x()][mOrigin.y()].GetContainPiece()<<"\n";
     //Marcar casillero actual
     pOrigin=QPoint{child->x(),child->y()};
-
+    //Invocar funciones de Drag and Drop
     QByteArray data;
     QDataStream dataStream(&data, QIODevice::WriteOnly);
     dataStream<<QPoint(event->pos()-child->pos());
@@ -90,7 +97,8 @@ void Board::dragMoveEvent(QDragMoveEvent *event)
             QPoint offset,result;
             dataStream>>offset;
             result=event->pos()-offset;
-            pieces[0]->move(result);
+            selectionPiece->move(result);
+
             //qDebug()<<result.x()<<"\t"<<result.y()<<"\n";
         }
         else
@@ -109,42 +117,50 @@ void Board::dropEvent(QDropEvent* event){
         QByteArray data = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&data, QIODevice::ReadOnly);
         int iX=0,iY=0;
-        QPoint offset,iMatrix,result;
+        QPoint offset,iM,result;
         dataStream>>offset;
         result=event->pos() - offset;
-        iMatrix=IndiceActual(result);
-        iX=tiles[iMatrix.x()][iMatrix.y()].x+20;
-        iY=tiles[iMatrix.x()][iMatrix.y()].y+40;
-        if(iMatrix.x()!=-1&&iMatrix.y()!=-1)
+        iM=IndiceActual(result);
+        iX=tiles[iM.x()][iM.y()].GetX()+20;
+        iY=tiles[iM.x()][iM.y()].GetY()+40;
+        if(!tiles[iM.x()][iM.y()].GetContainPiece())
         {
-            pieces[0]->move(iX,iY);
-            tiles[iMatrix.x()][iMatrix.y()].SetContainPiece(true);
+            selectionPiece->move(iX,iY);
+            tiles[iM.x()][iM.y()].SetContainPiece(true);
         }
         else
-            pieces[0]->move(result);
+        {
+            tiles[mOrigin.x()][mOrigin.y()].SetContainPiece(true);
+            selectionPiece->move(pOrigin);
+            //selectionPiece->move(result);
+        }
         if(event->source() == this){
            event->setDropAction(Qt::MoveAction);
            event->accept();
         }
-        qDebug()<<"La matriz "<<iMatrix.x()<<","<<iMatrix.y()
-               <<tiles[iMatrix.x()][iMatrix.y()].GetContainPiece()<<"\n";
+        qDebug()<<"La matriz "<<iM.x()<<","<<iM.y()
+               <<tiles[iM.x()][iM.y()].GetContainPiece()<<"\n";
     }
-    qDebug()<<pieces[0]->x()<<"\t"<<pieces[0]->y()<<"\n";
+    qDebug()<<selectionPiece->x()<<"\t"<<selectionPiece->y()<<"\n\n";
 }
 
 QPoint Board::IndiceActual(const QPoint &p)
 {
     QPoint indice{0,0};
+    uint8_t lim=0;
     for(int i=0;i<8;++i)
     {
-        if(p.x()<tiles[i][0].x+tiles[i][0].w&&p.x()>=tiles[i][0].x)
-        {
-            indice.setX(i);
-        }
-        if(p.y()<tiles[0][i].y+tiles[0][i].h&&p.y()>=tiles[0][i].y)
+        if(p.x()<tiles[0][i].GetX()+tiles[0][i].w&&p.x()>=tiles[0][i].GetX())
         {
             indice.setY(i);
+            ++lim;
         }
+        if(p.y()<tiles[i][0].GetY()+tiles[i][0].h&&p.y()>=tiles[i][0].GetY())
+        {
+            indice.setX(i);
+            ++lim;
+        }
+        if(lim==2)break;
     }
     return indice;
 }

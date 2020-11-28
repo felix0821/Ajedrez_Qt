@@ -6,3 +6,16 @@ Piece::Piece(QWidget *parent) :
 {
     ui->setupUi(this);
 }
+bool Piece::GetColor()const
+{
+    return color;
+}
+
+QPoint Piece::GetPosition() const
+{
+    return position;
+}
+void Piece::SetPosition(const QPoint& point)
+{
+    position=point;
+}

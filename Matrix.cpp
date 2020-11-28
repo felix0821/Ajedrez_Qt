@@ -7,8 +7,8 @@ Matrix::Matrix()
         std::vector <Tile> fogRow;
         for(int j=0;j<COL;j++)
         {
-            int x=((i)*45)+15;
-            int y=((j)*45)-15;
+            int y=((i)*45)-15;
+            int x=((j)*45)+15;
             fogRow.push_back(Tile(x,y));
         }
         Data.push_back(fogRow);

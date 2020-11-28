@@ -16,6 +16,7 @@
 #include "Piece.h"
 #include "Matrix.h"
 
+#define coeficienteDistancia 20;
 namespace Ui {
 class Board;
 }
@@ -35,7 +36,8 @@ private:
     QPixmap BoardIcon;
     std::vector<std::unique_ptr<Piece>>pieces;
     Matrix tiles;
-    QPoint pOrigin;
+    QPoint pOrigin,mOrigin;
+    Piece *selectionPiece;
     //funciones privadas
     //funciones de evento
     void mousePressEvent(QMouseEvent*) override;
