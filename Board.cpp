@@ -8,17 +8,33 @@ Board::Board(QWidget *parent) :
     ui->setupUi(this);
     setAcceptDrops(true);
     BoardIcon.load(":/images/MainBoard");
+    initPieces();
+}
+void Board::initPieces(){
     int cD=coeficienteDistancia;
     //Creacion de fichas (referencia,color,posicion)
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,0}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,1}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,2}));
+    pieces.push_back(std::make_unique<Rook>(this,true,QPoint{0,0}));
+    pieces.push_back(std::make_unique<Knight>(this,true,QPoint{0,1}));
+    pieces.push_back(std::make_unique<Bishop>(this,true,QPoint{0,2}));
     pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,3}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,4}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,5}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,6}));
-    pieces.push_back(std::make_unique<Queen>(this,true,QPoint{0,7}));
-    pieces.push_back(std::make_unique<Queen>(this,false,QPoint{7,7}));
+    pieces.push_back(std::make_unique<King>(this,true,QPoint{0,4}));
+    pieces.push_back(std::make_unique<Bishop>(this,true,QPoint{0,5}));
+    pieces.push_back(std::make_unique<Knight>(this,true,QPoint{0,6}));
+    pieces.push_back(std::make_unique<Rook>(this,true,QPoint{0,7}));
+    for (int i=0;i<8;i++) {
+        pieces.push_back(std::make_unique<Pawn>(this,true,QPoint{1,i}));
+    }
+    enemyPieces.push_back(std::make_unique<Rook>(this,false,QPoint{7,0}));
+    enemyPieces.push_back(std::make_unique<Knight>(this,false,QPoint{7,1}));
+    enemyPieces.push_back(std::make_unique<Bishop>(this,false,QPoint{7,2}));
+    enemyPieces.push_back(std::make_unique<Queen>(this,false,QPoint{7,3}));
+    enemyPieces.push_back(std::make_unique<King>(this,false,QPoint{7,4}));
+    enemyPieces.push_back(std::make_unique<Bishop>(this,false,QPoint{7,5}));
+    enemyPieces.push_back(std::make_unique<Knight>(this,false,QPoint{7,6}));
+    enemyPieces.push_back(std::make_unique<Rook>(this,false,QPoint{7,7}));
+    for (int i=0;i<8;i++) {
+        enemyPieces.push_back(std::make_unique<Pawn>(this,false,QPoint{6,i}));
+    }
     //Posicionar fichas
     for (unsigned i=0;i<pieces.size();i++) {
         int iX=pieces[i]->GetPosition().x();
@@ -26,6 +42,12 @@ Board::Board(QWidget *parent) :
         tiles[iX][iY].SetContainPiece(true);
         pieces[i]->move(tiles[iX][iY].GetX()+cD,
                 tiles[iX][iY].GetY()+(2*cD));
+    }
+    for (unsigned i=0;i<enemyPieces.size();i++) {
+        int iX=enemyPieces[i]->GetPosition().x();
+        int iY=enemyPieces[i]->GetPosition().y();
+        tiles[iX][iY].SetContainPiece(true);
+        enemyPieces[i]->move(tiles[iX][iY].GetX()+cD,tiles[iX][iY].GetY()+(2*cD));
     }
 }
 Board::~Board()

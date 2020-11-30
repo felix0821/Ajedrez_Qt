@@ -10,9 +10,14 @@
 #include <QDebug>
 #include <memory>
 #include <iostream>
-
 #include <vector>
+
+#include "Bishop.h"
+#include "King.h"
+#include "Knight.h"
+#include "Pawn.h"
 #include "Queen.h"
+#include "Rook.h"
 #include "Piece.h"
 #include "Matrix.h"
 
@@ -35,10 +40,12 @@ private:
     Ui::Board *ui;
     QPixmap BoardIcon;
     std::vector<std::unique_ptr<Piece>>pieces;
+    std::vector<std::unique_ptr<Piece>>enemyPieces;
     Matrix tiles;
     QPoint pOrigin,mOrigin;
     Piece *selectionPiece;
     //funciones privadas
+    void initPieces();
     //funciones de evento
     void mousePressEvent(QMouseEvent*) override;
     void dragEnterEvent(QDragEnterEvent *event) override;

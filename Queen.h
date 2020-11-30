@@ -1,9 +1,6 @@
 #ifndef QUEEN_H
 #define QUEEN_H
 
-#include <QDebug>
-#include <QWidget>
-#include <QLabel>
 #include "Piece.h"
 
 class Queen : public Piece
