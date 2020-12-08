@@ -3,6 +3,7 @@
 King::King(QWidget* parent,bool color,QPoint position):
     Piece(parent)
 {
+    this->id=6;
     this->color= color;
     this->position=position;
     if(color)
@@ -12,7 +13,7 @@ King::King(QWidget* parent,bool color,QPoint position):
     {
         icon.load(":/images/wKing");
     }
-    this->setPixmap(icon.scaled(QSize(60,40),Qt::KeepAspectRatio));
+    this->setPixmap(icon.scaled(QSize(70,55),Qt::KeepAspectRatio));
     this->adjustSize();
 }
 void King::MovePiece(){

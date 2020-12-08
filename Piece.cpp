@@ -6,6 +6,9 @@ Piece::Piece(QWidget *parent) :
 {
     ui->setupUi(this);
 }
+uint8_t Piece::GetId()const{
+    return id;
+}
 bool Piece::GetColor()const
 {
     return color;

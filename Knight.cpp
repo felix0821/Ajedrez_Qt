@@ -3,6 +3,7 @@
 Knight::Knight(QWidget* parent,bool color,QPoint position):
     Piece(parent)
 {
+    this->id=3;
     this->color= color;
     this->position=position;
     if(color)
@@ -12,7 +13,7 @@ Knight::Knight(QWidget* parent,bool color,QPoint position):
     {
         icon.load(":/images/wKnight");
     }
-    this->setPixmap(icon.scaled(QSize(60,40),Qt::KeepAspectRatio));
+    this->setPixmap(icon.scaled(QSize(70,55),Qt::KeepAspectRatio));
     this->adjustSize();
 }
 void Knight::MovePiece(){

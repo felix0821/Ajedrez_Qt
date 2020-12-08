@@ -13,5 +13,6 @@
         <file>images/wPawn.png</file>
         <file>images/wQueen.png</file>
         <file>images/wRook.png</file>
+        <file>images/Destello.png</file>
     </qresource>
 </RCC>

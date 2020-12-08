@@ -21,7 +21,7 @@
 #include "Piece.h"
 #include "Matrix.h"
 
-#define coeficienteDistancia 20;
+#define COEF_DIST 25
 namespace Ui {
 class Board;
 }
@@ -39,8 +39,10 @@ private:
     //variables privadas
     Ui::Board *ui;
     QPixmap BoardIcon;
+    std::vector<std::unique_ptr<QLabel>>signs;
     std::vector<std::unique_ptr<Piece>>pieces;
     std::vector<std::unique_ptr<Piece>>enemyPieces;
+    std::vector<QPoint>indexSigns;
     Matrix tiles;
     QPoint pOrigin,mOrigin;
     Piece *selectionPiece;
@@ -51,8 +53,13 @@ private:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent* event) override;
-    //funciones complemento
+    //metodos complemento
+    void pieceMove(const QPoint&);
     QPoint IndiceActual(const QPoint &p);
+    //metodos de funcionalidad
+    void CreateSignal();
+    std::vector<QPoint> AnalyzeMove();
+    void AnalyzePawn(std::vector<QPoint>&tempIndex,const int&x,const int&y);
 };
 
 #endif // BOARD_H

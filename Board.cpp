@@ -11,7 +11,7 @@ Board::Board(QWidget *parent) :
     initPieces();
 }
 void Board::initPieces(){
-    int cD=coeficienteDistancia;
+    int cD=COEF_DIST;
     //Creacion de fichas (referencia,color,posicion)
     pieces.push_back(std::make_unique<Rook>(this,true,QPoint{0,0}));
     pieces.push_back(std::make_unique<Knight>(this,true,QPoint{0,1}));
@@ -39,17 +39,18 @@ void Board::initPieces(){
     for (unsigned i=0;i<pieces.size();i++) {
         int iX=pieces[i]->GetPosition().x();
         int iY=pieces[i]->GetPosition().y();
-        tiles[iX][iY].SetContainPiece(true);
+        tiles[iX][iY].SetContainPiece(1);
         pieces[i]->move(tiles[iX][iY].GetX()+cD,
                 tiles[iX][iY].GetY()+(2*cD));
     }
     for (unsigned i=0;i<enemyPieces.size();i++) {
         int iX=enemyPieces[i]->GetPosition().x();
         int iY=enemyPieces[i]->GetPosition().y();
-        tiles[iX][iY].SetContainPiece(true);
+        tiles[iX][iY].SetContainPiece(2);
         enemyPieces[i]->move(tiles[iX][iY].GetX()+cD,tiles[iX][iY].GetY()+(2*cD));
     }
 }
+
 Board::~Board()
 {
     delete ui;
@@ -61,6 +62,9 @@ void Board::paintEvent(QPaintEvent*){
     painter.end();
 }
 void Board::mousePressEvent(QMouseEvent* event){
+    QPixmap Signal{},D;
+    Signal.load(":/images/Destello");
+    //QPixmap pixmapVal = signs[0]->pixmap(Qt::ReturnByValue);
     QPoint result;
     auto child = childAt(event->pos());
     selectionPiece= static_cast<Piece*>(childAt(event->pos()));
@@ -72,6 +76,8 @@ void Board::mousePressEvent(QMouseEvent* event){
     }
     qDebug()<<"Pieza Encontrada\n";
     qDebug()<<child->x()<<"\t"<<child->y()<<"\n";
+    CreateSignal();
+    //MoveCondition(selectionPiece,signs,this);
     //Desactivar casillero
     result= {child->x(),child->y()};
     mOrigin=IndiceActual(result);
@@ -138,51 +144,164 @@ void Board::dropEvent(QDropEvent* event){
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         QByteArray data = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&data, QIODevice::ReadOnly);
-        int iX=0,iY=0;
         QPoint offset,iM,result;
+        //Movimiento
         dataStream>>offset;
         result=event->pos() - offset;
         iM=IndiceActual(result);
-        iX=tiles[iM.x()][iM.y()].GetX()+20;
-        iY=tiles[iM.x()][iM.y()].GetY()+40;
-        if(!tiles[iM.x()][iM.y()].GetContainPiece())
-        {
-            selectionPiece->move(iX,iY);
-            tiles[iM.x()][iM.y()].SetContainPiece(true);
-        }
-        else
-        {
-            tiles[mOrigin.x()][mOrigin.y()].SetContainPiece(true);
-            selectionPiece->move(pOrigin);
-            //selectionPiece->move(result);
-        }
+        pieceMove(iM);
+        //Reiniciar señalizaciones
+        signs.clear();
+        indexSigns.clear();
         if(event->source() == this){
            event->setDropAction(Qt::MoveAction);
            event->accept();
         }
-        qDebug()<<"La matriz "<<iM.x()<<","<<iM.y()
-               <<tiles[iM.x()][iM.y()].GetContainPiece()<<"\n";
     }
     qDebug()<<selectionPiece->x()<<"\t"<<selectionPiece->y()<<"\n\n";
 }
-
+//Metodo que permite el movimiento de la ficha
+void Board::pieceMove(const QPoint &iM)
+{
+    int cD=COEF_DIST;
+    int iX=0,iY=0;
+    bool validMove=false;
+    iX=tiles[iM.x()][iM.y()].GetX()+cD;
+    iY=tiles[iM.x()][iM.y()].GetY()+(2*cD);
+    //Verioficar movimiento valido
+    for(unsigned i=0;i<indexSigns.size();++i)
+    {
+        if(indexSigns[i]==iM) validMove=true;
+    }
+    //tiles[iM.x()][iM.y()].GetContainPiece()==0
+    if(validMove)
+    {
+        uint8_t contain=tiles[iM.x()][iM.y()].GetContainPiece();
+        if(contain!=0){
+            if(contain==1)
+                for_each(pieces.begin(), pieces.end(),
+                              [=](std::unique_ptr<Piece> &n) { if(n!=NULL&&n->GetPosition()==iM)n=NULL; });
+            if(contain==2)
+                for_each(enemyPieces.begin(), enemyPieces.end(),
+                              [=](std::unique_ptr<Piece> &n) { if(n!=NULL&&n->GetPosition()==iM)n=NULL; });
+        }
+        selectionPiece->SetPosition(QPoint{iM});
+        selectionPiece->move(iX,iY);
+        tiles[iM.x()][iM.y()].SetContainPiece(selectionPiece->GetColor()?1:2);
+        //Mostrar mov
+        qDebug()<<"La matriz "<<iM.x()<<","<<iM.y()
+               <<tiles[iM.x()][iM.y()].GetContainPiece()<<"\n";
+    }
+    else
+    {
+        tiles[mOrigin.x()][mOrigin.y()].SetContainPiece(selectionPiece->GetColor()?1:2);
+        selectionPiece->move(pOrigin);
+        qDebug()<<"La matriz "<<mOrigin.x()<<","<<mOrigin.y()
+               <<tiles[mOrigin.x()][mOrigin.y()].GetContainPiece()<<"\n";
+    }
+}
+//Indica la posicion de la casilla segun la coordenada
 QPoint Board::IndiceActual(const QPoint &p)
 {
-    QPoint indice{0,0};
+    QPoint index{0,0};
     uint8_t lim=0;
     for(int i=0;i<8;++i)
     {
         if(p.x()<tiles[0][i].GetX()+tiles[0][i].w&&p.x()>=tiles[0][i].GetX())
         {
-            indice.setY(i);
+            index.setY(i);
             ++lim;
         }
         if(p.y()<tiles[i][0].GetY()+tiles[i][0].h&&p.y()>=tiles[i][0].GetY())
         {
-            indice.setX(i);
+            index.setX(i);
             ++lim;
         }
         if(lim==2)break;
     }
-    return indice;
+    return index;
+}
+//Crea las señalizaciones de la ficha
+void Board::CreateSignal()
+{
+    //qDebug()<<selectionPiece->GetPosition()<<"\n";
+    indexSigns=AnalyzeMove();
+    QPixmap Signal{":/images/Destello"};
+    for(unsigned i=0;i<indexSigns.size();++i)
+    {
+        int iX=indexSigns[i].x();
+        int iY=indexSigns[i].y();
+        signs.push_back(std::make_unique<QLabel>(this));
+        signs[i]->setPixmap(Signal.scaled(QSize(80,80),Qt::KeepAspectRatio));
+        signs[i]->adjustSize();
+        signs[i]->show();
+        signs[i]->move(tiles[iX][iY].GetX(),tiles[iX][iY].GetY()+35);
+    }
+    //qDebug()<<indexSigns.size()<<"\n";
+}
+//Analiza el movimiento de la ficha segun su id
+std::vector<QPoint> Board::AnalyzeMove()
+{   //s:selectionPiece
+    int sX=selectionPiece->GetPosition().x();
+    int sY=selectionPiece->GetPosition().y();
+    std::vector<QPoint>tempIndex;
+    uint8_t id=selectionPiece->GetId();
+    switch (id) {
+    case 1:
+        AnalyzePawn(tempIndex,sX,sY);
+        break;
+    }
+    return tempIndex;
+}
+//Analiza los posibles movimeintos del peon
+void Board::AnalyzePawn(std::vector<QPoint>&tempIndex,const int&x,const int&y)
+{
+    int abscissa,ordinate,sign;
+    uint8_t team,verify;
+    //Verificar la recta vertical
+    if(selectionPiece->GetColor()){
+        sign=1;
+        if(x==7) return;
+        abscissa= x==1? 2:1;
+    }
+    else {
+        sign=-1;
+        if(x==0) return;
+        abscissa=selectionPiece->GetPosition().x()==6? 2:1;
+    }
+    //Agregar señalizaciones hacia adelante
+    for(int i=0;i<abscissa;++i)
+    {
+        int xT=x+((i+1)*sign);
+        if(!tiles[xT][y].GetContainPiece())
+            tempIndex.push_back(QPoint{xT,y});
+        else break;
+    }
+    //Agrega señalizaciones de comida
+    abscissa=x+(1*sign);
+    team=selectionPiece->GetColor()?1:2;
+    switch (y) {
+    case 0:
+        ordinate=y+1;
+        verify=tiles[abscissa][ordinate].GetContainPiece();
+        if(verify!=0&&verify!=team)
+            tempIndex.push_back(QPoint{abscissa,ordinate});
+        break;
+    case 7:
+        ordinate=y-1;
+        verify=tiles[abscissa][ordinate].GetContainPiece();
+        if(verify!=0&&verify!=team)
+            tempIndex.push_back(QPoint{abscissa,ordinate});
+        break;
+    default:
+        ordinate=y+1;
+        verify=tiles[abscissa][ordinate].GetContainPiece();
+        if(verify!=0&&verify!=team)
+            tempIndex.push_back(QPoint{abscissa,ordinate});
+        ordinate=y-1;
+        verify=tiles[abscissa][ordinate].GetContainPiece();
+        if(verify!=0&&verify!=team)
+            tempIndex.push_back(QPoint{abscissa,ordinate});
+        return;
+    }
 }

@@ -6,11 +6,11 @@ Tile::Tile(int x, int y)
     this->y=y;
 }
 
-bool Tile::GetContainPiece()
+uint8_t Tile::GetContainPiece()
 {
     return containPiece;
 }
-void Tile::SetContainPiece(bool contain)
+void Tile::SetContainPiece(uint8_t contain)
 {
     containPiece=contain;
 }
