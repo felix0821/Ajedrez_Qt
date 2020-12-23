@@ -53,13 +53,14 @@ private:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent* event) override;
-    //metodos complemento
+    //metodos de apoyo
     void pieceMove(const QPoint&);
     QPoint IndiceActual(const QPoint &p);
     //metodos de funcionalidad
     void CreateSignal();
     std::vector<QPoint> AnalyzeMove();
     void AnalyzePawn(std::vector<QPoint>&tempIndex,const int&x,const int&y);
+    void AnalyzeRook(std::vector<QPoint>&tempIndex,const int&x,const int&y);
 };
 
 #endif // BOARD_H

@@ -250,6 +250,9 @@ std::vector<QPoint> Board::AnalyzeMove()
     case 1:
         AnalyzePawn(tempIndex,sX,sY);
         break;
+    case 2:
+        AnalyzeRook(tempIndex,sX,sY);
+        break;
     }
     return tempIndex;
 }
@@ -258,7 +261,7 @@ void Board::AnalyzePawn(std::vector<QPoint>&tempIndex,const int&x,const int&y)
 {
     int abscissa,ordinate,sign;
     uint8_t team,verify;
-    //Verificar la recta vertical
+    //Verificar la recta vertical y numero de movs
     if(selectionPiece->GetColor()){
         sign=1;
         if(x==7) return;
@@ -303,5 +306,46 @@ void Board::AnalyzePawn(std::vector<QPoint>&tempIndex,const int&x,const int&y)
         if(verify!=0&&verify!=team)
             tempIndex.push_back(QPoint{abscissa,ordinate});
         return;
+    }
+}
+
+void Board::AnalyzeRook(std::vector<QPoint>&tempIndex,const int&x,const int&y)
+{
+    int verifyP,verifyN;
+    //los closes son condiciones de bloqueo segun fichas
+    //los verifys son verificadores en ambos sentidos
+    uint8_t team,closeP{1},closeN{1};
+    team=selectionPiece->GetColor()?1:2;
+    int i=1;
+    while((closeP==1||closeN==1)&&i<7){
+        verifyP=-1;verifyN=-1;
+        if(y+i<8&&y+i>-1&&closeP==1)verifyP=tiles[x][y+i].GetContainPiece();
+        if(y-i<8&&y-i>-1&&closeN==1)verifyN=tiles[x][y-i].GetContainPiece();
+        if(verifyP!=-1&&verifyP!=team){
+            tempIndex.push_back(QPoint{x,y+i});
+        }
+        if(verifyP!=0)closeP=0;
+        if(verifyN!=-1&&verifyN!=team){
+            tempIndex.push_back(QPoint{x,y-i});
+        }
+        if(verifyN!=0)closeN=0;
+        if(verifyP==-1&&verifyN==-1){closeP=0;closeN=0;}
+        i++;
+    }
+    i=1;closeP=1;closeN=1;
+    while((closeP==1||closeN==1)&&i<7){
+        verifyP=-1;verifyN=-1;
+        if(x+i<8&&x+i>-1&&closeP==1)verifyP=tiles[x+i][y].GetContainPiece();
+        if(x-i<8&&x-i>-1&&closeN==1)verifyN=tiles[x-i][y].GetContainPiece();
+        if(verifyP!=-1&&verifyP!=team){
+            tempIndex.push_back(QPoint{x+i,y});
+        }
+        if(verifyP!=0)closeP=0;
+        if(verifyN!=-1&&verifyN!=team){
+            tempIndex.push_back(QPoint{x-i,y});
+        }
+        if(verifyN!=0)closeN=0;
+        if(verifyP==-1&&verifyN==-1){closeP=0;closeN=0;}
+        i++;
     }
 }
